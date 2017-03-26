@@ -138,7 +138,6 @@ void MainWindow::updateTable()
 		timer->start();
 		return;
 	}
-	qDebug() << "update";
 	if (forceUpdate)
 		forceUpdate = false;
 	QString path("/list=");
@@ -170,6 +169,14 @@ void MainWindow::readHttpBuffer(bool error)
 
 			stocksTable->setItem(ord, 1, new QTableWidgetItem(list.at(0)));
 			stocksTable->setItem(ord, 2, new QTableWidgetItem(list.at(3)));
+			if (stocks->at(ord).priceLessThan > list.at(3).toDouble())
+			{
+				systemTrayIcon->showMessage(tr("Warning"), list.at(0) + tr("'s price is less than ") + stocks->at(ord).priceLessThan);
+			}
+			if (stocks->at(ord).priceMoreThan < list.at(3).toDouble())
+			{
+				systemTrayIcon->showMessage(tr("Warning"), list.at(0) + tr("'s price is more than ") + stocks->at(ord).priceMoreThan);
+			}
 			ord++;
 		}
 	}

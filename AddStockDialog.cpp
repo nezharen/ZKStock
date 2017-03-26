@@ -9,6 +9,16 @@ AddStockDialog::AddStockDialog()
 	codeEdit->setAlignment(Qt::AlignHCenter);
 	codeLabel->setBuddy(codeEdit);
 
+	priceLessThanLabel = new QLabel(tr("Warn when price &less than:"));
+	priceLessThanEdit = new QLineEdit;
+	priceLessThanEdit->setAlignment(Qt::AlignHCenter);
+	priceLessThanLabel->setBuddy(priceLessThanEdit);
+
+	priceMoreThanLabel = new QLabel(tr("Warn when price &more than:"));
+	priceMoreThanEdit = new QLineEdit;
+	priceMoreThanEdit->setAlignment(Qt::AlignHCenter);
+	priceMoreThanLabel->setBuddy(priceMoreThanEdit);
+
 	addButton = new QPushButton(tr("&Add"));
 	addButton->setDefault(true);
 	exitButton = new QPushButton(tr("&Exit"));
@@ -18,9 +28,13 @@ AddStockDialog::AddStockDialog()
 
 	leftLayout = new QVBoxLayout;
 	leftLayout->addWidget(codeLabel);
+	leftLayout->addWidget(priceLessThanLabel);
+	leftLayout->addWidget(priceMoreThanLabel);
 
 	rightLayout = new QVBoxLayout;
 	rightLayout->addWidget(codeEdit);
+	rightLayout->addWidget(priceLessThanEdit);
+	rightLayout->addWidget(priceMoreThanEdit);
 
 	topLayout = new QHBoxLayout;
 	topLayout->addLayout(leftLayout);
@@ -52,7 +66,7 @@ void AddStockDialog::addStock()
 			QMessageBox::critical(this, tr("AddStock"), tr("Invalid code number."));
 			return;
 		}
-	Stock stock(codeEdit->text());
+	Stock stock(codeEdit->text(), priceLessThanEdit->text().toDouble(), priceMoreThanEdit->text().toDouble());
 	emit stockReadyToAdd(stock);
 	close();
 }

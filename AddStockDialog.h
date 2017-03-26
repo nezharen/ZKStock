@@ -18,8 +18,8 @@ signals:
 protected slots:
 	void addStock();
 private:
-	QLabel *codeLabel;
-	QLineEdit *codeEdit;
+	QLabel *codeLabel, *priceLessThanLabel, *priceMoreThanLabel;
+	QLineEdit *codeEdit, *priceLessThanEdit, *priceMoreThanEdit;
 	QPushButton *addButton, *exitButton;
 	QHBoxLayout *topLayout, *bottomLayout;
 	QVBoxLayout *leftLayout, *rightLayout, *mainLayout;

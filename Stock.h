@@ -5,9 +5,11 @@
 class Stock
 {
 public:
-	Stock(QString code);
+	Stock(QString code, double priceLessThan, double priceMoreThan);
 	QString code;
 	QString prefix;
+	double priceLessThan;
+	double priceMoreThan;
 };
 
 #endif
