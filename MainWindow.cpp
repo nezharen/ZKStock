@@ -11,12 +11,21 @@ MainWindow::MainWindow()
 	loadData();
 	createTable();
 
-	http = new QHttp(QString("hq.sinajs.cn"), 80, this);
+	codec = QTextCodec::codecForName("GBK");
+	http = new QHttp("hq.sinajs.cn", 80, this);
+	connect(http, SIGNAL(done(bool)), this, SLOT(readHttpBuffer(bool)));
 	addStockDialog = NULL;
+	forceUpdate = false;
+	timer = new QTimer(this);
+	timer->setSingleShot(true);
+	timer->setInterval(5000);
+	connect(timer, SIGNAL(timeout()), this, SLOT(updateTable()));
+
 	statusBar();
 	setWindowTitle(tr("ZKStock"));
 	setWindowIcon(QIcon(":/images/ZKStock.png"));
 	show();
+
 }
 
 void MainWindow::createAction()
@@ -55,10 +64,10 @@ void MainWindow::createTable()
 	QStringList header;
 	header << tr("Code") << tr("Name") << tr("Price") << tr("Rate");
 	stocksTable->setHorizontalHeaderLabels(header);
-	stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-	//stocksTable->verticalHeader()->setVisible(false);
-	//stocksTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	//stocksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+	//stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	stocksTable->verticalHeader()->setVisible(false);
+	stocksTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	stocksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 	setCentralWidget(stocksTable);
 }
 
@@ -113,11 +122,25 @@ void MainWindow::addStock(Stock newStock)
 			return;
 		}
 	stocks->append(newStock);
-	updateTable();
+	stocksTable->setRowCount(stocks->size());
+	stocksTable->setItem(stocks->size() - 1, 0, new QTableWidgetItem(newStock.code));
+	if (!timer->isActive())
+		timer->start();
+	forceUpdate = true;
 }
 
 void MainWindow::updateTable()
 {
+	QDate date = QDate::currentDate();
+	QTime time = QTime::currentTime();
+	if (!forceUpdate && (date.dayOfWeek() > 5 || !((time.hour() >= 9 && time.hour() <= 11) || (time.hour() >= 13 && time.hour() <= 15))))
+	{
+		timer->start();
+		return;
+	}
+	qDebug() << "update";
+	if (forceUpdate)
+		forceUpdate = false;
 	QString path("/list=");
 	for (int i = 0; i < stocks->size(); i++)
 	{
@@ -126,5 +149,30 @@ void MainWindow::updateTable()
 		path += stocks->at(i).prefix;
 		path += stocks->at(i).code;
 	}
-	http->get(path);
+	httpBuffer = new QBuffer(this);
+	httpBuffer->open(QBuffer::ReadWrite);
+	http->get(path, httpBuffer);
+}
+
+void MainWindow::readHttpBuffer(bool error)
+{
+	if (!error)
+	{
+		httpBuffer->seek(0);
+		int ord = 0;
+		while (true)
+		{
+			QString s = codec->toUnicode(httpBuffer->readLine());
+			if (s.isEmpty())
+				break;
+			QStringList list = s.split("\"").at(1).split(",");
+			stocksTable->setItem(ord, 0, new QTableWidgetItem(s.mid(13, 6)));
+
+			stocksTable->setItem(ord, 1, new QTableWidgetItem(list.at(0)));
+			stocksTable->setItem(ord, 2, new QTableWidgetItem(list.at(3)));
+			ord++;
+		}
+	}
+	httpBuffer->close();
+	delete httpBuffer;
 }
