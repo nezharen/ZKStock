@@ -1,4 +1,5 @@
 #include <QtGui>
+#include <QtNetwork>
 #include "AddStockDialog.h"
 #include "MainWindow.h"
 
@@ -8,7 +9,9 @@ MainWindow::MainWindow()
 	createAction();
 	createMenu();
 	loadData();
+	createTable();
 
+	http = new QHttp(QString("hq.sinajs.cn"), 80, this);
 	addStockDialog = NULL;
 	statusBar();
 	setWindowTitle(tr("ZKStock"));
@@ -43,6 +46,20 @@ void MainWindow::createSystemTrayIcon()
 void MainWindow::loadData()
 {
 	stocks = new QList<Stock>;
+}
+
+void MainWindow::createTable()
+{
+	stocksTable = new QTableWidget(this);
+	stocksTable->setColumnCount(4);
+	QStringList header;
+	header << tr("Code") << tr("Name") << tr("Price") << tr("Rate");
+	stocksTable->setHorizontalHeaderLabels(header);
+	stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	//stocksTable->verticalHeader()->setVisible(false);
+	//stocksTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	//stocksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+	setCentralWidget(stocksTable);
 }
 
 void MainWindow::getClosed()
@@ -96,4 +113,18 @@ void MainWindow::addStock(Stock newStock)
 			return;
 		}
 	stocks->append(newStock);
+	updateTable();
+}
+
+void MainWindow::updateTable()
+{
+	QString path("/list=");
+	for (int i = 0; i < stocks->size(); i++)
+	{
+		if (i > 0)
+			path += QChar(',');
+		path += stocks->at(i).prefix;
+		path += stocks->at(i).code;
+	}
+	http->get(path);
 }

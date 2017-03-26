@@ -8,6 +8,8 @@
 class QAction;
 class QMenu;
 class AddStockDialog;
+class QTableWidget;
+class QHttp;
 
 class MainWindow : public QMainWindow
 {
@@ -19,6 +21,8 @@ protected:
 	void createMenu();
 	void createSystemTrayIcon();
 	void loadData();
+	void createTable();
+	void updateTable();
 	void closeEvent(QCloseEvent *event);
 protected slots:
 	void systemTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -31,7 +35,9 @@ private:
 	QAction *exitAction;
 	QMenu *stockMenu;
 	QList<Stock> *stocks;
+	QTableWidget *stocksTable;
 	AddStockDialog *addStockDialog;
+	QHttp *http;
 };
 
 #endif
