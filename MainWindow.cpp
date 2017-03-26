@@ -3,10 +3,11 @@
 
 MainWindow::MainWindow()
 {
-	systemTrayIcon = new QSystemTrayIcon(this);
+	systemTrayIcon = new QSystemTrayIcon(QIcon(":/images/ZKStock.png"), this);
 	connect(systemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(systemTrayIconActivated(QSystemTrayIcon::ActivationReason)));
 	systemTrayIcon->show();
 	setWindowTitle(tr("ZKStock"));
+	setWindowIcon(QIcon(":/images/ZKStock.png"));
 	show();
 }
 
