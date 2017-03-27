@@ -25,7 +25,6 @@ MainWindow::MainWindow()
 	setWindowTitle(tr("ZKStock"));
 	setWindowIcon(QIcon(":/images/ZKStock.png"));
 	show();
-
 }
 
 void MainWindow::createAction()
@@ -60,11 +59,11 @@ void MainWindow::loadData()
 void MainWindow::createTable()
 {
 	stocksTable = new QTableWidget(this);
-	stocksTable->setColumnCount(4);
+	stocksTable->setColumnCount(6);
 	QStringList header;
-	header << tr("Code") << tr("Name") << tr("Price") << tr("Rate");
+	header << tr("Code") << tr("Name") << tr("Price") << tr("Rate") << tr("WarnPriceLessThan") << tr("WarnPriceMoreThan");
 	stocksTable->setHorizontalHeaderLabels(header);
-	//stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 	stocksTable->verticalHeader()->setVisible(false);
 	stocksTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	stocksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -166,9 +165,11 @@ void MainWindow::readHttpBuffer(bool error)
 				break;
 			QStringList list = s.split("\"").at(1).split(",");
 			stocksTable->setItem(ord, 0, new QTableWidgetItem(s.mid(13, 6)));
-
 			stocksTable->setItem(ord, 1, new QTableWidgetItem(list.at(0)));
 			stocksTable->setItem(ord, 2, new QTableWidgetItem(list.at(3)));
+			stocksTable->setItem(ord, 3, new QTableWidgetItem(QString::number((list.at(3).toDouble() - list.at(2).toDouble()) / list.at(2).toDouble() * 100) + QString("%")));
+			stocksTable->setItem(ord, 4, new QTableWidgetItem(QString::number(stocks->at(ord).priceLessThan)));
+			stocksTable->setItem(ord, 5, new QTableWidgetItem(QString::number(stocks->at(ord).priceMoreThan)));
 			if (stocks->at(ord).priceLessThan > list.at(3).toDouble())
 			{
 				systemTrayIcon->showMessage(tr("Warning"), list.at(0) + tr("'s price is less than %1").arg(stocks->at(ord).priceLessThan));

@@ -66,7 +66,15 @@ void AddStockDialog::addStock()
 			QMessageBox::critical(this, tr("AddStock"), tr("Invalid code number."));
 			return;
 		}
-	Stock stock(codeEdit->text(), priceLessThanEdit->text().toDouble(), priceMoreThanEdit->text().toDouble());
+	bool ok;
+	double priceLessThan, priceMoreThan;
+	priceLessThan = priceLessThanEdit->text().toDouble(&ok);
+	if (!ok)
+		priceLessThan = 0.0;
+	priceMoreThan = priceMoreThanEdit->text().toDouble(&ok);
+	if (!ok)
+		priceMoreThan = 100.0;
+	Stock stock(codeEdit->text(), priceLessThan, priceMoreThan);
 	emit stockReadyToAdd(stock);
 	close();
 }
