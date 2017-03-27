@@ -133,7 +133,7 @@ void MainWindow::updateTable()
 {
 	QDate date = QDate::currentDate();
 	QTime time = QTime::currentTime();
-	if (!forceUpdate && (date.dayOfWeek() > 5 || !((time.hour() >= 9 && time.hour() <= 11) || (time.hour() >= 13 && time.hour() <= 15))))
+	if (!forceUpdate && (date.dayOfWeek() > 5 || !(((time.hour() > 9 || (time.hour() == 9 && time.minute() >= 30)) && (time.hour() < 11 || (time.hour() == 11 && time.minute() <= 30))) || (time.hour() >= 13 && time.hour() <= 15))))
 	{
 		timer->start();
 		return;
