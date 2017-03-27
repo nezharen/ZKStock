@@ -8,7 +8,9 @@
 class QAction;
 class QMenu;
 class AddStockDialog;
+class SetStockDialog;
 class QTableWidget;
+class QTableWidgetItem;
 class QHttp;
 class QBuffer;
 class QTextCodec;
@@ -30,7 +32,9 @@ protected slots:
 	void systemTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 	void getClosed();
 	void showAddStockDialog();
+	void showSetStockDialog(QTableWidgetItem *item);
 	void addStock(Stock newStock);
+	void setStock(Stock stock);
 	void readHttpBuffer(bool error);
 	void updateTable();
 private:
@@ -41,6 +45,7 @@ private:
 	QList<Stock> *stocks;
 	QTableWidget *stocksTable;
 	AddStockDialog *addStockDialog;
+	SetStockDialog *setStockDialog;
 	QHttp *http;
 	QBuffer *httpBuffer;
 	QTextCodec *codec;

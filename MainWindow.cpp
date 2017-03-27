@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtNetwork>
 #include "AddStockDialog.h"
+#include "SetStockDialog.h"
 #include "MainWindow.h"
 
 MainWindow::MainWindow()
@@ -15,6 +16,7 @@ MainWindow::MainWindow()
 	http = new QHttp("hq.sinajs.cn", 80, this);
 	connect(http, SIGNAL(done(bool)), this, SLOT(readHttpBuffer(bool)));
 	addStockDialog = NULL;
+	setStockDialog = NULL;
 	forceUpdate = false;
 	timer = new QTimer(this);
 	timer->setSingleShot(true);
@@ -63,11 +65,12 @@ void MainWindow::createTable()
 	QStringList header;
 	header << tr("Code") << tr("Name") << tr("Price") << tr("Rate") << tr("WarnPriceLessThan") << tr("WarnPriceMoreThan");
 	stocksTable->setHorizontalHeaderLabels(header);
-	stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	//stocksTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 	stocksTable->verticalHeader()->setVisible(false);
 	stocksTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	stocksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 	setCentralWidget(stocksTable);
+	connect(stocksTable, SIGNAL(itemDoubleClicked(QTableWidgetItem *)), this, SLOT(showSetStockDialog(QTableWidgetItem *)));
 }
 
 void MainWindow::getClosed()
@@ -123,9 +126,37 @@ void MainWindow::addStock(Stock newStock)
 	stocks->append(newStock);
 	stocksTable->setRowCount(stocks->size());
 	stocksTable->setItem(stocks->size() - 1, 0, new QTableWidgetItem(newStock.code));
+	stocksTable->setItem(stocks->size() - 1, 4, new QTableWidgetItem(QString::number(newStock.priceLessThan)));
+	stocksTable->setItem(stocks->size() - 1, 5, new QTableWidgetItem(QString::number(newStock.priceMoreThan)));
 	if (!timer->isActive())
 		timer->start();
 	forceUpdate = true;
+}
+
+void MainWindow::showSetStockDialog(QTableWidgetItem *item)
+{
+	if (setStockDialog == NULL)
+	{
+		setStockDialog = new SetStockDialog(stocks->at(item->row()));
+		connect(setStockDialog, SIGNAL(stockReadyToSet(Stock)), this, SLOT(setStock(Stock)));
+	}
+	setStockDialog->show();
+	setStockDialog->raise();
+	setStockDialog->activateWindow();
+
+}
+
+void MainWindow::setStock(Stock stock)
+{
+	for (int i = 0; i < stocks->size(); i++)
+		if (stocks->at(i).code == stock.code)
+		{
+			(*stocks)[i] = stock;
+			stocksTable->setItem(i, 0, new QTableWidgetItem(stock.code));
+			stocksTable->setItem(i, 4, new QTableWidgetItem(QString::number(stock.priceLessThan)));
+			stocksTable->setItem(i, 5, new QTableWidgetItem(QString::number(stock.priceMoreThan)));
+			return;
+		}
 }
 
 void MainWindow::updateTable()
