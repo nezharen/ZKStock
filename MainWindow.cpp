@@ -186,4 +186,5 @@ void MainWindow::readHttpBuffer(bool error)
 	}
 	httpBuffer->close();
 	delete httpBuffer;
+	timer->start();
 }
