@@ -205,13 +205,13 @@ void MainWindow::readHttpBuffer(bool error)
 			{
 				systemTrayIcon->showMessage(tr("Warning"), list.at(0) + tr("'s price is less than %1").arg(stocks->at(ord).priceLessThan));
 				system((tr("notify-send \"ZKStock\" \"") + list.at(0) + tr("'s price is less than %1").arg(stocks->at(ord).priceLessThan) + tr("\"")).toUtf8().data());
-				(*stocks)[ord].priceLessThan = -1e9;
+				(*stocks)[ord].priceLessThan -= 0.1;
 			}
 			if (stocks->at(ord).priceMoreThan < list.at(3).toDouble())
 			{
 				systemTrayIcon->showMessage(tr("Warning"), list.at(0) + tr("'s price is more than %1").arg(stocks->at(ord).priceMoreThan));
 				system((tr("notify-send \"ZKStock\" \"") + list.at(0) + tr("'s price is more than %1").arg(stocks->at(ord).priceMoreThan) + tr("\"")).toUtf8().data());
-				(*stocks)[ord].priceMoreThan = 1e9;
+				(*stocks)[ord].priceMoreThan += 0.1;
 			}
 			ord++;
 		}
